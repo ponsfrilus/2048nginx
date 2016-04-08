@@ -1,0 +1,12 @@
+[Unit]
+Description=2048nginx
+
+[Service]
+TimeoutStartSec=10m
+ExecStartPre=/usr/bin/docker pull ponsfrilus/2048nginx
+ExecStartPre=/usr/bin/sh -c '/usr/bin/docker rm -f %n || true'
+ExecStart=/usr/bin/sh -c 'docker run --name=%n -p 8080:80 ponsfrilus/2048nginx'
+ExecStop=/usr/bin/docker kill %n
+Restart=on-failure
+RestartSec=5
+
