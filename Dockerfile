@@ -1,37 +1,23 @@
-#
-# Nginx Dockerfile
-#
-# https://github.com/dockerfile/nginx
-#
+# Docker file pour un serveur web et le jeu 2048
 
-# Pull base image.
-FROM ubuntu:14.04
+# Basé sur la dernière image de nginx, https://hub.docker.com/_/nginx
+FROM nginx
 
-# Install soft prop common for add-apt-repository command
-RUN DEBIAN_FRONTEND=noninteractive apt-get -y install software-properties-common
-# Install Nginx.
-RUN \
-  add-apt-repository -y ppa:nginx/stable && \
-  apt-get update && \
-  apt-get install -y nginx && \
-  rm -rf /var/lib/apt/lists/* && \
-  echo "\ndaemon off;" >> /etc/nginx/nginx.conf && \
-  chown -R www-data:www-data /var/lib/nginx
+# L'image est basée sur debian, les commandes apt fonctionnent
+RUN apt update
 
-# Define mountable directories.
-#VOLUME ["/etc/nginx/sites-enabled", "/etc/nginx/certs", "/etc/nginx/conf.d", "/var/log/nginx", "/var/www/html"]
+# Afin de pouvoir récupérer le code de 2048, nous avons besoin de git
+RUN apt -y install git
 
-# Copy the 2048 source file in the container
-COPY web /var/www/html
-# Be sure that web server can access them
-RUN chown -R www-data:www-data /var/www/html
+# La commande WORKDIR permet de définir le dossier de travail
+WORKDIR /usr/share/nginx
 
-# Define working directory.
-WORKDIR /etc/nginx
+# On estime que les fichiers par défaut ne sont pas nécessaire
+RUN rm -rf html
 
-# Define default command.
-CMD ["nginx"]
+# On clone le code de l'application dans le répertoire qui est «servi» par
+# nginx, notre serveur web, qui a précédemment été supprimé
+RUN git clone https://github.com/gabrielecirulli/2048.git /usr/share/nginx/html
 
-# Expose ports.
+# On expose le port 80, port par défaut des applications web
 EXPOSE 80
-EXPOSE 443
